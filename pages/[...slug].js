@@ -1,17 +1,12 @@
 import React from 'react';
 import Head from "next/head"
 
-import { StoryblokComponent, useStoryblokState, getStoryblokApi } from '@storyblok/react';
+import { StoryblokComponent, getStoryblokApi } from '@storyblok/react';
 
 const Page = ({story}) => {
-    story = useStoryblokState(story, {
-        resolveRelations: ["note-highlights.title"],
-    });
-
     return (
         <div>
             <Head>
-                <title> {story ? story.title : "Note App"}</title>
                 <link rel="icon" href="/favicon.ico" />
                 </Head>
                 <header>
@@ -45,22 +40,19 @@ export async function getStaticProps({params}) {
 export async function getStaticPaths() {
     const storyblokApi = getStoryblokApi()
     let {data} = await storyblokApi.get(`cdn/links/`)
-
     let paths = [];
-
-    Object.keys(data.links).forEach(linkKey => {
-        if(data.links[linkKey].is_folder || data.links[linkKey].slug === "home") {
+    Object.keys(data.links).forEach((linkKey) => {
+        if (data.links[linkKey].is_folder || data.links[linkKey].slug === "home") {
             return;
         }
+
         const slug = data.links[linkKey].slug;
         let splittedSlug = slug.split("/");
-        paths.push({params: {
-            slug: splittedSlug
-        }});
+        paths.push({ params: { slug: splittedSlug } });
+    });
 
-        return {
-            paths: paths,
-            fallback: false,
-        };
-    })
+    return {
+        paths,
+        fallback: false
+    };
 }
